@@ -1,7 +1,6 @@
 import pandas as pd
 from conn import connElasticSearch
 from getDataS import getdata
-from teachdata import teach_data
 
 
 def getdataisbnUid(keyword, userId, activate_nn=False):
@@ -64,13 +63,6 @@ def getdataisbnUid(keyword, userId, activate_nn=False):
         ratings += [rate]
 
     books['rating'] = ratings
-
-    if activate_nn:
-        # books with no rating by user
-        fil = (books['rating'] == 0)
-        # check if there are unrated books
-        if fil.value_counts()[0]:
-            books.loc[fil, 'rating'] = teach_data(userId, books[fil])
 
     score = []
     # formulating and calculating the scores
