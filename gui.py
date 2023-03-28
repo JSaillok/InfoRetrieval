@@ -1,11 +1,12 @@
-import tkinter as tk
+from tkinter import *
 from upload import uploadData
 from checkIndex import checkdata
 from getDataS import getdata
 from getDataID import getdataisbnUid
 
-root = tk.Tk()
-root.geometry("500x500")
+#Initialize the main window
+root = Tk()
+root.geometry("400x250")
 root.title("Saillok Search")
 
 def option_1():
@@ -49,20 +50,23 @@ def sel():
     elif choice == 3:
         option_3()
 
-label = tk.Label(root, text="Welcome!", font=('Arial', 18))
+label = Label(root, text="Welcome!", font=('Helvetica', 18))
 label.pack(padx=20, pady=20)
 
-var = tk.IntVar()
-R1 = tk.Radiobutton(root, text="Upload to Elasticsearch", variable=var, value=1, command=sel)
-R1.pack(anchor=tk.W)
+var = IntVar()
+R1 = Radiobutton(root, text="Upload to Elasticsearch", variable=var, value=1, command=sel)
+R1.pack(anchor=W)
 
-R2 = tk.Radiobutton(root, text="Check through index name", variable=var, value=2, command=sel)
-R2.pack(anchor=tk.W)
+R2 = Radiobutton(root, text="Check through index name", variable=var, value=2, command=sel)
+R2.pack(anchor=W)
 
-R3 = tk.Radiobutton(root, text="Search book", variable=var, value=3, command=sel)
-R3.pack(anchor=tk.W)
+R3 = Radiobutton(root, text="Search book", variable=var, value=3, command=sel)
+R3.pack(anchor=W)
 
-label = tk.Label(root, text="")
+ConButton = Button(root, text='Continue')
+ConButton.pack()
+
+label = Label(root, text="")
 label.pack()
 
 root.mainloop()
