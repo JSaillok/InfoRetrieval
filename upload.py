@@ -12,3 +12,5 @@ def uploadData(filename, indexname):
 			helpers.bulk(cn, reader, index=indexname)
 	except FileNotFoundError:
 		print("The file with that name does not exists")
+	except Exception as e:
+		raise Exception(f"Error uploading data: {str(e)}")

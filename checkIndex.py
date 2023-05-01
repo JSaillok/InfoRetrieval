@@ -5,4 +5,5 @@ from conn import connElasticSearch
 def checkdata(index):
 	cn = connElasticSearch()
 	result = cn.search(index=index, size=1000)
-	print("Number of documents retrieved: ", result['hits']['total']['value'])
+	num_docs = result['hits']['total']['value']
+	return num_docs

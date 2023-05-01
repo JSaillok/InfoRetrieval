@@ -1,4 +1,3 @@
-import pandas as pd
 from conn import connElasticSearch
 from getDataS import getdata
 from teachdata import teach_data
