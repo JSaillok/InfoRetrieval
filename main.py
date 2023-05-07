@@ -2,6 +2,7 @@ from upload import uploadData
 from checkIndex import checkdata
 from getDataS import getdata
 from getDataID import getdataisbnUid
+from dataCluster import clusterData
 
 #MENU
 
@@ -10,7 +11,8 @@ def menu():
 		1: option_1,
 		2: option_2,
 		3: option_3,
-		4: quit
+		4: option_4,
+		5: quit
 	}
     
 	while True:
@@ -18,7 +20,8 @@ def menu():
 		print("1. Upload a File to ElasticSearch")
 		print("2. Check via index")
 		print("3. Retrieve Data from ElasticSearch")
-		print("4. Quit")
+		print("4. Data Cluster")
+		print("5. Quit")
 		choice = int(input("Enter your choice: "))
 		if choice in options:
 			options[choice]()
@@ -58,6 +61,15 @@ def option_3():
 		print('MATCH QUERY METRIC THROUGH USER ID'.center(75, '='))
 		print(books.loc[:, ['book_title', 'book_author', 'score']])
 		print(75 * "=")
+
+def option_4():
+	print('1. Euclidean Distance')
+	print('2. Cosine Similarity')
+	ch = int(input('Choice: '))
+	dist = 'cosine_similarity'
+	if ch == 1:
+		dist = 'euclidean_distance'
+	clusterData(dist)
 
 
 def quit():
