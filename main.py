@@ -49,7 +49,7 @@ def option_3():
 		books = getdata('books', keyword)
 		print('MATCH QUERY METRIC'.center(75, '='))
 		print(books.loc[:, ['book_title', 'book_author', 'score']])
-		print(100 * "=")
+		print(75 * "=")
 	elif choice == 2:
 		user = int(input("Give user id: "))
 		ch = input("Use neural network? [Y/n]: ").lower().strip()
