@@ -1,6 +1,6 @@
 from conn import connElasticSearch
 
-# Check the data if they re uploaded
+# Check the data if they 're uploaded
 
 def checkdata(index):
 	cn = connElasticSearch()
