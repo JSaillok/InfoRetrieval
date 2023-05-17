@@ -47,9 +47,9 @@ def option_3():
 	choice = int(input("Choice: "))
 	if choice == 1:
 		books = getdata('books', keyword)
-		print('MATCH QUERY METRIC'.center(75, '='))
+		print('MATCH QUERY METRIC'.center(95, '='))
 		print(books.loc[:, ['book_title', 'book_author', 'score']])
-		print(75 * "=")
+		print(95 * "=")
 	elif choice == 2:
 		user = int(input("Give user id: "))
 		ch = input("Use neural network? [Y/n]: ").lower().strip()
@@ -58,9 +58,9 @@ def option_3():
 		else:
 			state = False
 		books = getdataisbnUid(keyword, user, activate_nn=state)
-		print('MATCH QUERY METRIC THROUGH USER ID'.center(75, '='))
+		print('MATCH QUERY METRIC THROUGH USER ID'.center(95, '='))
 		print(books.loc[:, ['book_title', 'book_author', 'score']])
-		print(75 * "=")
+		print(95 * "=")
 
 def option_4():
 	print('1. Euclidean Distance')

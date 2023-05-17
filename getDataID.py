@@ -27,16 +27,16 @@ def getdataisbnUid(keyword, userId, activate_nn=False):
         }
 
         # execute query
-        r = cn.search(index='bratings', query=query, size=10000)
+        rst = cn.search(index='bratings', query=query, size=10000)
 
-        if not r['hits']['hits']:
+        if not rst['hits']['hits']:
             return 0, 0
 
         s = 0
         cnt = 0
         # get user's grade
-        userRating = int(r['hits']['hits'][0]['_source']['rating'])
-        for h in r['hits']['hits']:
+        userRating = int(rst['hits']['hits'][0]['_source']['rating'])
+        for h in rst['hits']['hits']:
             # grade > 0
             some_user_rate = int(h['_source']['rating'])
             if some_user_rate:

@@ -18,7 +18,8 @@ import seaborn as sns; sns.set_theme()
 
 # returns a ES connection object
 def connect_to_elastic():
-    client = Elasticsearch(host="localhost", port=9200, verify_certs=True)
+    ES_NODES = "http://localhost:9200"
+    client = Elasticsearch(hosts = [ES_NODES])
     if client.ping():
         return client
     else:
@@ -39,7 +40,7 @@ def put_data_to_elastic(filename, index_name):
 
 
 # matches data with simple OR similarity
-def get_data_from_elastic_simple(index_name, keyword) -> 'match query as pd':
+def get_data_from_elastic_simple(index_name, keyword):
     client = connect_to_elastic()
     # refresh elastic
     client.indices.refresh(index=index_name)
@@ -64,7 +65,7 @@ def get_data_from_elastic_simple(index_name, keyword) -> 'match query as pd':
     return df
 
 
-def get_data_from_elastic_custom(keyword, user_id, activate_nn=False) -> 'custom match query as pd':
+def get_data_from_elastic_custom(keyword, user_id, activate_nn=False):
     # inner function to return book avg
     def get_isbn_rating_avg(book_code):
         # match isbn and boost if user has read it
@@ -88,7 +89,10 @@ def get_data_from_elastic_custom(keyword, user_id, activate_nn=False) -> 'custom
         }
 
         # execute query
-        r = client.search(index='books-ratings', query=query, size=10000)
+        r = client.search(index='bratings', query=query, size=10000)
+
+        if not r['hits']['hits']:
+            return 0, 0
 
         s = 0
         cnt = 0
@@ -143,7 +147,7 @@ def get_data_from_elastic_custom(keyword, user_id, activate_nn=False) -> 'custom
 
 def get_data_to_teach_user(user_id):
     client = connect_to_elastic()
-    res = client.search(index='books-ratings', query={"match": {"uid": user_id}}, size=10000)
+    res = client.search(index='bratings', query={"match": {"uid": user_id}}, size=10000)
 
     array = []
     # get all the books(isbn) for a user into a list
@@ -278,7 +282,7 @@ def fetch_to_cluster(size):
     # for each book
     for isbn in isbns:
         match_isbn = {"match": {"isbn": isbn}}
-        res = client.search(index='books-ratings', query=match_isbn, aggregations=aggr, size=0)
+        res = client.search(index='bratings', query=match_isbn, aggregations=aggr, size=0)
         temp_list = []
         # get users and ratings
         for hit in res['aggregations']['aggs']['hits']['hits']:

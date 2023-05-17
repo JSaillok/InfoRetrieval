@@ -11,7 +11,7 @@ def getdata(indexname, keyword):
 			"book_title": keyword
 		}
 	}
-	result = cn.search(index=indexname, query=match_query)
+	result = cn.search(index=indexname, query=match_query, size=10000)
 
 	books = []
 	score = []
