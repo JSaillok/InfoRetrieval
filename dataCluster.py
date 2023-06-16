@@ -1,4 +1,4 @@
-from uploadCluster import upload_cluster
+from fetchCluster import fetch_cluster
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import PCA
@@ -10,87 +10,89 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 
 def clusterData(metric, userId=None):
-    def clear_them(df, i):
+    def clr(df, i):
         countries = []
         ratings = []
         # return data from cluster i as df
         tempdf = df[df['cluster'] == i].loc[:, ['users']]
         usa_countries = ['pender', 'washington,', 'florida,', 'missouri,', 'republic', 'california,', 'carolina,', 'massachusetts,', 'nebr,', 'tennessee,', 'states', 'pennsylvania,', 'texas,', 'ohio,', 'york,']
+        # Extract country and rating information for each user in each book
         for index, row in tempdf.iterrows():
             # if not empty
             if row['users']:
                 # for each user in each book
                 for t in row['users']:
                     # country = ",".join(t[0].split(", ")[-2:])
-                    country = t[0].split()[-1]
-                    # if country registered and rate not 0
+                    country = t[0].split()[-1] # Extract the country from the user information
+                    # # Check if the country is registered and the rating is not 0
                     if len(country) > 2 and int(t[2]):
                         if country in usa_countries:
                             country = 'usa'
                         countries.append(country)
                         ratings.append(int(t[2]))
 
-        # group data
-        group_it = pd.DataFrame({"country": [c for c in countries], "rating": [r for r in ratings]},
+        # Group the data based on country and rating
+        groupit = pd.DataFrame({"country": [c for c in countries], "rating": [r for r in ratings]},
                                 columns=['country', 'rating']) \
             .value_counts(['country', 'rating']).reset_index()
-        group_it.rename({group_it.columns[-1]: 'times'}, axis=1, inplace=True)
+        groupit.rename({groupit.columns[-1]: 'times'}, axis=1, inplace=True)
 
-        return group_it
+        return groupit
 
     # fetch summaries
-    df = upload_cluster(int(input('Books to fetch: ')))
+    df = fetch_cluster(int(input('Books to fetch: ')))
 
-    # convert summaries to vectors and normalize them
-    vec = CountVectorizer()
-    X = vec.fit_transform(df['summary']).toarray()
+    # # Convert summaries to vectors using CountVectorizer
+    vc = CountVectorizer()
+    A = vc.fit_transform(df['summary']).toarray()
 
-    # dim reduction with SVD
-    xSvd = PCA(2).fit_transform(X)
+    # Perform dimensionality reduction with PCA
+    aSvd = PCA(2).fit_transform(A)
 
-    # fit them to kmeans
-    opt_k = find_opt_k(xSvd)
+    # Find the optimal K value using the find_opt_k function
+    opt_k = find_opt_k(aSvd)
 
     if metric == 'cosine_similarity':
-        # data normalization
-        xSvd = normalize(xSvd)
-        # calculate magnitudes and divide by it
-        length = np.sqrt((xSvd ** 2).sum(axis=1))[:, None]
-        xSvd = xSvd / length
+        # Normalize the data using L2 normalization
+        aSvd = normalize(aSvd)
+        # Calculate the magnitudes and divide by them
+        length = np.sqrt((aSvd ** 2).sum(axis=1))[:, None]
+        aSvd = aSvd / length
 
-        # produce k-means
-        kmeans = KMeans(n_clusters=opt_k, n_init=10).fit(xSvd)
+        # Perform K-means clustering
+        kmeans = KMeans(n_clusters=opt_k, n_init=10).fit(aSvd)
 
-        # calculate centroids
+        # Calculate the normalized centroids
         len_ = np.sqrt(np.square(kmeans.cluster_centers_).sum(axis=1)[:, None])
         centroids = kmeans.cluster_centers_ / len_
     elif metric == 'euclidean_distance':
-        # produce k-means
-        kmeans = KMeans(n_clusters=opt_k, n_init=10).fit(xSvd)
+        # Perform K-means clustering
+        kmeans = KMeans(n_clusters=opt_k, n_init=10).fit(aSvd)
         centroids = kmeans.cluster_centers_
     else:
         raise SyntaxError('Choose one of the following: "euclidean_distance", "cosine_distance"')
 
-    df['cluster'] = kmeans.predict(xSvd)
+    # Assign cluster labels to the DataFrame
+    df['cluster'] = kmeans.predict(aSvd)
 
-    # Getting unique clusters
+    # Get unique cluster labels
     u_clusters = np.unique(df['cluster'])
 
-    # plotting the results:
+    # Plotting results:
     for i in u_clusters:
-        plt.scatter(xSvd[df['cluster'] == i, 0], xSvd[df['cluster'] == i, 1], label=i)
+        plt.scatter(aSvd[df['cluster'] == i, 0], aSvd[df['cluster'] == i, 1], label=i)
 
     plt.scatter(centroids[:, 0], centroids[:, 1], color='black', marker='*', label='centroid')
-    # convert metric input to graph title
+    # Convert the metric input to the graph title
     words = metric.replace('_', ' ').split()
     title = words[0].capitalize() + " " + words[1].capitalize()
     plt.title(title)
     plt.legend()
     plt.show()
 
-    # form data for heat map for each cluster
+    # Generate heat maps for each cluster
     for i in range(0, opt_k):
-        plot_df = clear_them(df, i)
+        plot_df = clr(df, i)
         plot_df = plot_df.pivot(index="country", columns="rating", values="times")
         sns.heatmap(plot_df, linewidths=.3, yticklabels=True)
         plt.yticks()

@@ -4,9 +4,9 @@ from teachdata import teach_data
 
 
 def getdataisbnUid(keyword, userId, activate_nn=False):
-    # inner function to return book avg
+    #book avg
     def isbnRatingAvg(book_code):
-        # match isbn and boost if user has read it
+        # match isbn and boost
         query = {
             "bool": {
                 "must": [
@@ -27,27 +27,27 @@ def getdataisbnUid(keyword, userId, activate_nn=False):
         }
 
         # execute query
-        rst = cn.search(index='bratings', query=query, size=10000)
+        rslt = cn.search(index='bratings', query=query, size=10000)
 
-        if not rst['hits']['hits']:
+        if not rslt['hits']['hits']:
             return 0, 0
 
-        s = 0
-        cnt = 0
+        sum = 0
+        counter = 0
         # get user's grade
-        userRating = int(rst['hits']['hits'][0]['_source']['rating'])
-        for h in rst['hits']['hits']:
+        userRating = int(rslt['hits']['hits'][0]['_source']['rating'])
+        for ht in rslt['hits']['hits']:
             # grade > 0
-            some_user_rate = int(h['_source']['rating'])
-            if some_user_rate:
-                s += some_user_rate
-                cnt += 1
+            somebodies_rates = int(ht['_source']['rating'])
+            if somebodies_rates:
+                sum += somebodies_rates
+                counter += 1
 
         # checking for division by zero
-        if cnt != 0:
-            return (s / cnt), userRating
+        if counter != 0:
+            return (sum / counter), userRating
         else:
-            return s, userRating
+            return sum, userRating
 
     cn = connElasticSearch()
 

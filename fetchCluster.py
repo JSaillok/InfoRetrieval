@@ -1,21 +1,23 @@
 from conn import connElasticSearch
 import pandas as pd
 
-def upload_cluster(size):
+def fetch_cluster(size):
     cn = connElasticSearch()
 
-    match_query = {"match_all": {}}
+    # Define the match query to retrieve all documents
+    matchq = {"match_all": {}}
 
-    # execute query and return matches
-    res = cn.search(index='books', query=match_query, size=size)
+    # Execute the query and retrieve the matching documents
+    result = cn.search(index='books', query=matchq, size=size)
 
     summary = []
     isbns = []
-    for hit in res['hits']['hits']:
+    # Extract the summary and ISBN of each book
+    for hit in result['hits']['hits']:
         summary.append(hit['_source']['summary'])
         isbns.append(hit['_source']['isbn'])
 
-    # aggregation for each isbn up to 100 users
+    # Aggregation for each ISBN with a maximum of 100 users
     aggr = {
         "aggs": {
             "top_hits": {
@@ -26,20 +28,21 @@ def upload_cluster(size):
     }
 
     users = []
-    # for each book
     for isbn in isbns:
+        # Match query to retrieve users who rated the book
         match_isbn = {"match": {"isbn": isbn}}
         res = cn.search(index='bratings', query=match_isbn, aggregations=aggr, size=0)
         temp_list = []
-        # get users and ratings
+        # Retrieve users and their ratings
         for hit in res['aggregations']['aggs']['hits']['hits']:
             match_user = {"match": {"uid": hit['_source']['uid']}}
             userRes = cn.search(index='users', query=match_user, size=1)
-            # if user exists
+            # Check if the user exists
             if userRes['hits']['hits']:
                 temp = userRes['hits']['hits'][0]['_source']
                 temp_list.append((temp['location'], temp['age'], hit['_source']['rating']))
         users.append(temp_list)
-
+    
+    # Create a DataFrame to store the retrieved data
     return pd.DataFrame({"summary": [s for s in summary], "users": [user for user in users]},
                         columns=['summary', 'users'])
